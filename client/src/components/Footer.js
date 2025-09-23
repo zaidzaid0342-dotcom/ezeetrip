@@ -11,15 +11,23 @@ const Footer = () => {
           <div className="col-lg-4 col-md-6 mb-4">
             <div className="d-flex align-items-center mb-3">
               <div className="logo-container me-2">
-                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <img 
+                src="https://t4.ftcdn.net/jpg/06/69/59/39/240_F_669593927_gN5dR3fy1IQP5yvAq0YTb8OdMZfq6A38.jpg" 
+                alt="Ezee Trip Logo" 
+                className="rounded-circle img-fluid"
+              />
                   <circle cx="50" cy="50" r="45" fill="#0d6efd" />
                   <path d="M30 50 L45 35 L55 45 L70 30 L70 70 L55 55 L45 65 L30 50 Z" fill="white" />
                   <circle cx="50" cy="50" r="8" fill="white" />
-                </svg>
+                
               </div>
               <h4 className="mb-0">Ezee<span className="text-primary">Trip</span></h4>
             </div>
             <p className="mb-3">Your trusted travel partner for exploring the breathtaking beauty of Chikkamagaluru and beyond.</p>
+            
+           
+            
+            
             <div className="social-links d-flex gap-3 mt-4">
               <a href="https://wa.me/9845212525" target="_blank" rel="noopener noreferrer" className="social-icon">
                 <i className="fab fa-whatsapp"></i>
@@ -58,7 +66,7 @@ const Footer = () => {
             <ul className="list-unstyled footer-contact">
               <li className="mb-3 d-flex align-items-start">
                 <i className="fas fa-map-marker-alt me-3 mt-1"></i>
-                <span>123 Coffee Estate Road, Chikkamagaluru, Karnataka 577101</span>
+                <span>Coffee Estate Road, Chikkamagaluru, Karnataka 577101</span>
               </li>
               <li className="mb-3 d-flex align-items-center">
                 <i className="fas fa-phone-alt me-3"></i>
@@ -66,9 +74,8 @@ const Footer = () => {
               </li>
               <li className="mb-3 d-flex align-items-center">
                 <i className="fas fa-envelope me-3"></i>
-                <span>info@ezeetrip.com</span>
+                <span>ibbtours.ckm@gmail.com</span>
               </li>
-              
             </ul>
           </div>
         </div>
@@ -81,7 +88,6 @@ const Footer = () => {
           </div>
           <div className="col-md-6 text-md-end">
             <p className="mb-0 footer-legal">
-              <Link to="/privacy" className="footer-legal-link me-3">Privacy Policy</Link>
               <Link to="/terms" className="footer-legal-link">Terms of Service</Link>
             </p>
           </div>
@@ -229,6 +235,20 @@ const Footer = () => {
           color: white;
         }
         
+        /* Added styles for the logo image */
+        .footer-logo-container {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 1rem;
+        }
+        
+        
+        .footer-logo-container img:hover {
+          transform: scale(1.05);
+          border-color: #0d6efd;
+          box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+        }
+        
         @media (max-width: 768px) {
           footer {
             padding-top: 3rem;
@@ -252,6 +272,8 @@ const Footer = () => {
             width: 35px;
             height: 35px;
           }
+          
+          
         }
       `}</style>
     </footer>

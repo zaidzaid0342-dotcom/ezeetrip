@@ -10,6 +10,7 @@ import PackageDetails from './pages/PackageDetails';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Terms from './pages/Terms';
 import MyBookings from './pages/MyBookings';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminPackageManagement from './pages/AdminPackageManagement';
@@ -34,6 +35,7 @@ function App() {
               <Route path="/packages/:id" component={PackageDetails} />
               <Route path="/login" component={Login} />
               <Route path="/register" component={Register} />
+              <Route path="/terms" component={Terms}/>
               
               {/* Protected Routes (require authentication) */}
               <ProtectedRoute path="/profile" component={Profile} />

@@ -38,26 +38,11 @@ const Navbar = () => {
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center" to="/">
           <div className="logo-container me-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 100 100" className="logo">
-              {/* Outer circle */}
-              <circle cx="50" cy="50" r="45" fill="#0d6efd" />
-              
-              {/* Inner circle - lighter shade */}
-              <circle cx="50" cy="50" r="38" fill="#4d94ff" />
-              
-              {/* Mountain silhouette */}
-              <path d="M25 65 L40 45 L50 55 L60 40 L75 65 Z" fill="white" opacity="0.9" />
-              
-              {/* Sun */}
-              <circle cx="70" cy="30" r="8" fill="#FFD700" />
-              
-              {/* Road/path */}
-              <path d="M20 70 Q50 80 80 70" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" />
-              
-              {/* Location pin */}
-              <path d="M50 35 C45 35 40 40 40 45 C40 50 50 65 50 65 C50 65 60 50 60 45 C60 40 55 35 50 35 Z" fill="white" />
-              <circle cx="50" cy="45" r="3" fill="#0d6efd" />
-            </svg>
+           <img 
+                src="https://t4.ftcdn.net/jpg/06/69/59/39/240_F_669593927_gN5dR3fy1IQP5yvAq0YTb8OdMZfq6A38.jpg" 
+                alt="Ezee Trip Logo" 
+                className="rounded-circle img-fluid"
+              />
           </div>
           <div className="brand-text">
             <span className="brand-name">Ezee</span>
