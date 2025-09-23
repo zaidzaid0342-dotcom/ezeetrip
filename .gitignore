@@ -1,0 +1,8 @@
+# dependencies
+node_modules
+npm-debug.log
+
+# local env files
+server/config/config.env
+server/.env
+client/.env
