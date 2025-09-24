@@ -48,7 +48,7 @@ app.use(limiter);
 
 // Enable CORS (only allow your frontend in production)
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*', 
+  origin: 'https://ezeetrip.vercel.app', 
   credentials: true
 }));
 
