@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "1.0.0",
   "private": true,
-  "proxy": "http://localhost:5000",
+  
   "dependencies": {
     "aos": "^2.3.4",
     "axios": "^0.24.0",
