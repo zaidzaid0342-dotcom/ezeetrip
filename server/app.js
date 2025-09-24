@@ -47,10 +47,22 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Enable CORS (only allow your frontend in production)
+const allowedOrigins = [
+  'http://localhost:3000',       // local dev frontend
+  'https://ezeetrip.vercel.app'  // deployed frontend
+];
+
 app.use(cors({
-  origin: 'https://ezeetrip.vercel.app', 
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
