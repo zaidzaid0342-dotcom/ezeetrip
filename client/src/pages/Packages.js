@@ -20,7 +20,7 @@ const Packages = () => {
     const fetchPackages = async () => {
       try {
         const API_BASE = process.env.REACT_APP_API_URL;
-         const res = await axios.get(`${API_BASE}/api/packages`);
+const res = await axios.get(`${API_BASE}/packages`);
 
         setPackages(res.data.data);
         setFilteredPackages(res.data.data);
