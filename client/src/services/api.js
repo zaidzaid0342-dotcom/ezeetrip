@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api' // Adjust to your backend URL
+  baseURL: 'https://ezeetrip.onrender.com' // Adjust to your backend URL
 });
 
 // Add a request interceptor to include the auth token

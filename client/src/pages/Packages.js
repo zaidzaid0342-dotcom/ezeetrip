@@ -19,7 +19,9 @@ const Packages = () => {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const res = await axios.get('/api/packages');
+        const API_BASE = process.env.REACT_APP_API_URL;
+         const res = await axios.get(`${API_BASE}/api/packages`);
+
         setPackages(res.data.data);
         setFilteredPackages(res.data.data);
         setLoading(false);
