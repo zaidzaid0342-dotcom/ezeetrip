@@ -1,5 +1,5 @@
 // client/src/context/AuthContext.js
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import api from '../services/api';
 
@@ -10,105 +10,196 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(() => {
-    const savedUser = sessionStorage.getItem('user') || localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const history = useHistory();
+  const isMounted = useRef(true);
+  const authCheckComplete = useRef(false);
+  const redirectInProgress = useRef(false);
+  const tabId = useRef(Date.now().toString()); // Unique ID for this tab
 
-  // Store token in storage & set API headers
-  const storeToken = useCallback((token, remember = false) => {
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // Function to store token in sessionStorage and set headers
+  const storeToken = useCallback((token) => {
+   // console.log('Storing token in sessionStorage:', token);
     try {
-      if (remember) localStorage.setItem('token', token);
-      else sessionStorage.setItem('token', token);
+      sessionStorage.setItem('token', token); // Changed to sessionStorage
+      // Set the token in the API headers
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } catch (err) {
-      console.error('Error storing token:', err);
+      //console.log('Token stored successfully');
+    } catch (error) {
+     // console.error('Error storing token in sessionStorage:', error);
     }
   }, []);
 
-  // Update auth state and store user
-  const updateAuthState = useCallback((user, remember = false) => {
-    setCurrentUser(user);
-    setLoading(false);
+  // Function to update authentication state
+  const updateAuthState = useCallback((user) => {
+  
+    
+    if (isMounted.current) {
+      setCurrentUser(user);
+      setLoading(false);
+    }
+    
     if (user) {
-      const userData = {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      };
-      if (remember) localStorage.setItem('user', JSON.stringify(userData));
-      else sessionStorage.setItem('user', JSON.stringify(userData));
+      try {
+        // Store only the necessary user data in sessionStorage
+        const userData = {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        };
+        sessionStorage.setItem('user', JSON.stringify(userData)); // Changed to sessionStorage
+        //console.log('User data stored successfully');
+      } catch (error) {
+       
+      }
     } else {
-      sessionStorage.removeItem('user');
-      sessionStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
+     // console.log('Clearing authentication data');
+      sessionStorage.removeItem('user'); // Changed to sessionStorage
+      sessionStorage.removeItem('token'); // Changed to sessionStorage
+      // Remove the token from the API headers
       delete api.defaults.headers.common['Authorization'];
     }
   }, []);
 
-  // Check auth status on mount
+  // Function to check authentication status
   const checkAuthStatus = useCallback(async () => {
     try {
-      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
-      if (token) {
+      const token = sessionStorage.getItem('token'); // Changed to sessionStorage
+      const user = sessionStorage.getItem('user'); // Changed to sessionStorage
+      
+      
+      
+      if (token && user) {
+        // Set the token in the API headers
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        const res = await api.get('/auth/me'); // backend must return { user: {...} }
-        updateAuthState(res.data.user);
+        
+        // Verify token with backend
+        const res = await api.get('/auth/me');
+       // console.log('Auth check response:', res.data);
+        updateAuthState(res.data.data);
       } else {
+        //console.log('No token or user found in sessionStorage');
         updateAuthState(null);
       }
-    } catch (err) {
+    } catch (error) {
+      //console.error('Auth check failed:', error);
       updateAuthState(null);
+    } finally {
+      authCheckComplete.current = true;
     }
   }, [updateAuthState]);
 
+  // Check authentication status on initial load
   useEffect(() => {
+    
     checkAuthStatus();
   }, [checkAuthStatus]);
 
   // Login function
-  const login = useCallback(async (email, password, remember = false) => {
+  const login = useCallback(async (email, password) => {
     try {
+      
       const res = await api.post('/auth/login', { email, password });
+      
+      
+      // Extract token and user data from response
       const { token, user } = res.data;
-      storeToken(token, remember);
-      updateAuthState(user, remember);
-      if (user.role === 'admin') history.push('/admin');
-      else history.push('/');
+      
+     
+      
+      // Store the token in sessionStorage and set headers
+      storeToken(token);
+      
+      // Update the authentication state with user data
+      updateAuthState(user);
+      
+      // Redirect based on user role
+      if (isMounted.current && !redirectInProgress.current) {
+        redirectInProgress.current = true;
+        // Use setTimeout to ensure state updates are complete
+        setTimeout(() => {
+          if (isMounted.current && history) {
+            if (user.role === 'admin') {
+              history.push('/admin');
+            } else {
+              history.push('/');
+            }
+          }
+          redirectInProgress.current = false;
+        }, 100);
+      }
+      
       return res.data;
-    } catch (err) {
-      throw new Error(err.response?.data?.message || 'Login failed');
+    } catch (error) {
+      //console.error('Login error:', error);
+      throw error;
     }
   }, [storeToken, updateAuthState, history]);
 
   // Register function
-  const register = useCallback(async (userData, remember = false) => {
+  const register = useCallback(async (userData) => {
     try {
+      
       const res = await api.post('/auth/register', userData);
+    
+      
+      // Extract token and user data from response
       const { token, user } = res.data;
-      storeToken(token, remember);
-      updateAuthState(user, remember);
-      if (user.role === 'admin') history.push('/admin');
-      else history.push('/');
+      
+      // Store the token in sessionStorage and set headers
+      storeToken(token);
+      
+      // Update the authentication state with user data
+      updateAuthState(user);
+      
+      // Redirect based on user role
+      if (isMounted.current && !redirectInProgress.current) {
+        redirectInProgress.current = true;
+        // Use setTimeout to ensure state updates are complete
+        setTimeout(() => {
+          if (isMounted.current && history) {
+            if (user.role === 'admin') {
+              history.push('/admin');
+            } else {
+              history.push('/');
+            }
+          }
+          redirectInProgress.current = false;
+        }, 100);
+      }
+      
       return res.data;
-    } catch (err) {
-      throw new Error(err.response?.data?.message || 'Registration failed');
+    } catch (error) {
+      
+      // Extract and return the error message
+      const errorMessage = error.response?.data?.message || 'Registration failed';
+      throw new Error(errorMessage);
     }
   }, [storeToken, updateAuthState, history]);
 
   // Logout function
   const logout = useCallback(async () => {
     try {
-      await api.post('/auth/logout'); // optional backend logout
-    } catch (err) {
-      console.log('Logout error:', err);
+      await api.post('/auth/logout');
+    } catch (error) {
+      //console.error('Logout error:', error);
     } finally {
+      // Clear authentication state
       updateAuthState(null);
-      history.push('/login');
+      
+      // Redirect to login page
+      if (isMounted.current && history) {
+        history.push('/login');
+      }
     }
   }, [updateAuthState, history]);
 
@@ -123,5 +214,9 @@ export function AuthProvider({ children }) {
     checkAuthStatus
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
