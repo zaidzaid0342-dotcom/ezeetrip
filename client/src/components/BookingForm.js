@@ -211,7 +211,7 @@ const BookingForm = ({ pkg }) => {
                 <strong>Total Price:</strong> ₹{totalPrice}
               </div>
             </div>
-            <div className="form-text mt-2">Note: This is the Amount of Per Day</div>
+            <div className="form-text mt-2"></div>
           </div>
           
           <button type="submit" className="btn btn-primary w-100" disabled={loading}>
