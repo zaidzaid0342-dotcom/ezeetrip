@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const PackageCard = ({ pkg }) => {
   // Add debug logging to see what's being passed
-  console.log('PackageCard received data:', pkg);
+  //console.log('PackageCard received data:', pkg);
   
   // Check if pkg is undefined or null
   if (!pkg) {
@@ -25,7 +25,7 @@ const PackageCard = ({ pkg }) => {
   
   // Function to handle image loading errors
   const handleImageError = (e) => {
-    console.error(`Failed to load image for package ${name}:`, e.target.src);
+    //console.error(`Failed to load image for package ${name}:`, e.target.src);
     e.target.onerror = null;
     e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Available';
   };
