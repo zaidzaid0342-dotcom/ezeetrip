@@ -211,7 +211,7 @@ const BookingForm = ({ pkg }) => {
                 <strong>Total Price:</strong> ₹{totalPrice}
               </div>
             </div>
-            <div className="form-text mt-2"></div>
+            <div className="form-text mt-2">Free Pickup Within Chikkamagaluru</div>
           </div>
           
           <button type="submit" className="btn btn-primary w-100" disabled={loading}>
