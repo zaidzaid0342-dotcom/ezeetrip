@@ -214,7 +214,7 @@ const PackageDetails = () => {
                   <div className="package-meta">
                     <div className="price-info">
                       <span className="price">₹{pkg.price}</span>
-                      <span className="price-unit">per adult per day</span>
+                      <span className="price-unit">per adult</span>
                     </div>
                     <div className="availability-badge">
                       {pkg.available ? 
@@ -274,7 +274,7 @@ const PackageDetails = () => {
                     </div>
                     <div className="feature-content">
                       <h4>Pricing</h4>
-                      <p>Adults: ₹{pkg.price}/day | Children: ₹{pkg.price / 2}/day</p>
+                      <p>Adults: ₹{pkg.price}/Per Person | Children: ₹{pkg.price / 2}/Per Person</p>
                     </div>
                   </div>
                 </div>
