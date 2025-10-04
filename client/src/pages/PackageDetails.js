@@ -1,5 +1,5 @@
 // client/src/pages/PackageDetails.js
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -17,21 +17,65 @@ const PackageDetails = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
-  useEffect(() => {
-    const fetchPackage = async () => {
-      try {
-        const res = await api.get(`/packages/${id}`);
-        setPackage(res.data.data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.response.data.message);
-        setLoading(false);
-      }
-    };
-    
-    fetchPackage();
+  // ALL HOOKS MUST BE CALLED HERE (before any conditional returns)
+  
+  // Memoized fetch function to prevent unnecessary re-fetching
+  const fetchPackage = useCallback(async () => {
+    try {
+      const res = await api.get(`/packages/${id}`);
+      setPackage(res.data.data);
+      setError('');
+      setLoading(false);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch package details');
+      setLoading(false);
+    }
   }, [id]);
+  
+  // Function to refresh package data
+  const refreshPackage = useCallback(() => {
+    setRefreshing(true);
+    fetchPackage().finally(() => setRefreshing(false));
+  }, [fetchPackage]);
+  
+  // Image navigation handlers
+  const nextImage = useCallback(() => {
+    setImageLoading(true);
+    setActiveImageIndex((prevIndex) => 
+      prevIndex === (pkg?.images?.length || 0) - 1 ? 0 : prevIndex + 1
+    );
+  }, [pkg?.images?.length]);
+  
+  const prevImage = useCallback(() => {
+    setImageLoading(true);
+    setActiveImageIndex((prevIndex) => 
+      prevIndex === 0 ? (pkg?.images?.length || 0) - 1 : prevIndex - 1
+    );
+  }, [pkg?.images?.length]);
+  
+  const handleImageLoad = useCallback(() => {
+    setImageLoading(false);
+    setImageError(false);
+  }, []);
+  
+  const handleImageError = useCallback(() => {
+    setImageLoading(false);
+    setImageError(true);
+  }, []);
+  
+  const handleThumbnailClick = useCallback((index) => {
+    setImageLoading(true);
+    setActiveImageIndex(index);
+  }, []);
+  
+  // Initial fetch
+  useEffect(() => {
+    fetchPackage();
+  }, [fetchPackage]);
+  
+  // NOW WE CAN DO CONDITIONAL RETURNS
   
   if (loading) {
     return <Spinner />;
@@ -46,12 +90,32 @@ const PackageDetails = () => {
           </div>
           <h3 className="error-title">Oops! Something went wrong</h3>
           <p className="error-message">{error}</p>
-          <button 
-            className="btn btn-primary"
-            onClick={() => history.push('/packages')}
-          >
-            Back to Packages
-          </button>
+          <div className="error-actions">
+            <button 
+              className="btn btn-primary"
+              onClick={refreshPackage}
+              disabled={refreshing}
+            >
+              {refreshing ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Refreshing...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-arrow-clockwise me-2"></i>
+                  Try Again
+                </>
+              )}
+            </button>
+            <button 
+              className="btn btn-outline-secondary"
+              onClick={() => history.push('/packages')}
+            >
+              <i className="bi bi-arrow-left me-2"></i>
+              Back to Packages
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -79,30 +143,6 @@ const PackageDetails = () => {
   
   // Check if user is admin
   const isAdmin = isAuthenticated && user && user.role === 'admin';
-  
-  const nextImage = () => {
-    setImageLoading(true);
-    setActiveImageIndex((prevIndex) => 
-      prevIndex === pkg.images.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-  
-  const prevImage = () => {
-    setImageLoading(true);
-    setActiveImageIndex((prevIndex) => 
-      prevIndex === 0 ? pkg.images.length - 1 : prevIndex - 1
-    );
-  };
-  
-  const handleImageLoad = () => {
-    setImageLoading(false);
-    setImageError(false);
-  };
-  
-  const handleImageError = () => {
-    setImageLoading(false);
-    setImageError(true);
-  };
   
   return (
     <div className="package-details-page">
@@ -139,10 +179,20 @@ const PackageDetails = () => {
                           <i className="bi bi-exclamation-triangle"></i>
                           <h4>Image Failed to Load</h4>
                           <p>Please try again later</p>
+                          <button 
+                            className="btn btn-sm btn-outline-primary mt-2"
+                            onClick={() => {
+                              setImageLoading(true);
+                              setImageError(false);
+                            }}
+                          >
+                            Retry
+                          </button>
                         </div>
                       </div>
                     ) : (
                       <img 
+                        key={activeImageIndex} // Force re-render when index changes
                         src={pkg.images[activeImageIndex]} 
                         className="main-image" 
                         alt={`${pkg.name} view ${activeImageIndex + 1}`}
@@ -163,12 +213,9 @@ const PackageDetails = () => {
                     <div className="thumbnail-container">
                       {pkg.images.map((image, index) => (
                         <div 
-                          key={index} 
+                          key={index}
                           className={`thumbnail ${index === activeImageIndex ? 'active' : ''}`}
-                          onClick={() => {
-                            setImageLoading(true);
-                            setActiveImageIndex(index);
-                          }}
+                          onClick={() => handleThumbnailClick(index)}
                         >
                           <img 
                             src={image} 
@@ -305,7 +352,7 @@ const PackageDetails = () => {
               <div className="booking-body">
                 {isAuthenticated && !isAdmin ? (
                   pkg.available ? (
-                    <BookingForm pkg={pkg} />
+                    <BookingForm pkg={pkg} onBookingSuccess={refreshPackage} />
                   ) : (
                     <div className="booking-unavailable">
                       <div className="unavailable-icon">
@@ -419,6 +466,12 @@ const PackageDetails = () => {
           font-size: 18px;
           color: #6c757d;
           margin-bottom: 30px;
+        }
+        
+        .error-actions {
+          display: flex;
+          gap: 10px;
+          justify-content: center;
         }
         
         /* Image Gallery */
@@ -549,6 +602,22 @@ const PackageDetails = () => {
           background-color: #f8f9fa;
           overflow-x: auto;
           gap: 10px;
+          scrollbar-width: thin;
+          scrollbar-color: #19376D;
+        }
+        
+        .thumbnail-container::-webkit-scrollbar {
+          height: 8px;
+        }
+        
+        .thumbnail-container::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 4px;
+        }
+        
+        .thumbnail-container::-webkit-scrollbar-thumb {
+          background: #19376D;
+          border-radius: 4px;
         }
         
         .thumbnail {
