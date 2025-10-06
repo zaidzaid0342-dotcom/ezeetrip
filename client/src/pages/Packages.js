@@ -18,6 +18,7 @@ const Packages = () => {
   });
   const [apiError, setApiError] = useState(false);
   const [cssLoaded, setCssLoaded] = useState(false);
+  const [networkError, setNetworkError] = useState(false); // New state for network errors
 
   useEffect(() => {
     // Check if CSS is loaded
@@ -45,6 +46,7 @@ const Packages = () => {
         // Set a timeout for the request
         timeoutId = setTimeout(() => {
           source.cancel('Request timed out');
+          setNetworkError(true); // Set network error on timeout
         }, 10000); // 10 seconds timeout
         
         const res = await axios.get(`${API_BASE}/packages`, {
@@ -56,9 +58,11 @@ const Packages = () => {
         setPackages(res.data.data);
         setFilteredPackages(res.data.data);
         setLoading(false);
+        setNetworkError(false); // Reset network error on success
       } catch (err) {
         if (axios.isCancel(err)) {
           console.error('Request canceled:', err.message);
+          // Don't set apiError for timeout, we handle it with networkError
         } else {
           console.error('Error fetching packages:', err);
           setApiError(true);
@@ -125,6 +129,7 @@ const Packages = () => {
   const retryFetch = () => {
     setLoading(true);
     setApiError(false);
+    setNetworkError(false); // Reset network error on retry
     const fetchPackages = async () => {
       try {
         const API_BASE = process.env.REACT_APP_API_URL;
@@ -132,6 +137,7 @@ const Packages = () => {
         setPackages(res.data.data);
         setFilteredPackages(res.data.data);
         setLoading(false);
+        setNetworkError(false); // Reset network error on success
       } catch (err) {
         console.error('Error fetching packages:', err);
         setApiError(true);
@@ -295,6 +301,77 @@ const Packages = () => {
     .package-card .card-button.skeleton {
       height: 36px;
       width: 100px;
+    }
+    
+    /* Network Error Styles */
+    .network-error-container {
+      text-align: center;
+      padding: 80px 20px;
+      background-color: var(--white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--box-shadow);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .network-error-icon {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 24px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffc107'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    
+    .network-error-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--gray-dark);
+      margin-bottom: 16px;
+    }
+    
+    .network-error-message {
+      color: var(--gray);
+      margin-bottom: 32px;
+      font-size: 18px;
+    }
+    
+    .btn-refresh {
+      display: inline-block;
+      background-color: var(--warning);
+      color: var(--white);
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .btn-refresh:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #e0a800;
+      z-index: -1;
+      transition: transform 0.5s;
+      transform: scaleX(0);
+      transform-origin: right;
+    }
+    
+    .btn-refresh:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--box-shadow);
+    }
+    
+    .btn-refresh:hover:before {
+      transform: scaleX(1);
+      transform-origin: left;
     }
     
     /* Responsive styles */
@@ -507,6 +584,47 @@ const Packages = () => {
             </p>
             <button className="btn-retry" onClick={retryFetch}>
               Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (networkError) {
+    return (
+      <div className="packages-page">
+        <style>{criticalCSS}</style>
+        
+        {/* Hero Section */}
+        <section className="packages-hero">
+          <div className="hero-background"></div>
+          <div className="hero-content">
+            <div className="container">
+              <div className="row">
+                <div className="col-lg-6">
+                  <div className="hero-text">
+                    <div className="hero-tag">Crafting Memories Since 2000</div>
+                    <h1 className="hero-title">Discover Chikkamagaluru</h1>
+                    <p className="hero-description">
+                      For over two decades, we've been sharing the magic of Karnataka's coffee country with travelers from around the world.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <div id="packages" className="container packages-container">
+          <div className="network-error-container">
+            <div className="network-error-icon"></div>
+            <h3 className="network-error-title">Slow Network Connection</h3>
+            <p className="network-error-message">
+              It's taking longer than usual to load packages. This might be due to a slow network connection. Please refresh to try again.
+            </p>
+            <button className="btn-refresh" onClick={retryFetch}>
+              Refresh to Load Packages
             </button>
           </div>
         </div>
