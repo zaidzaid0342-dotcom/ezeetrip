@@ -54,7 +54,8 @@ const Login = () => {
     } catch (err) {
       console.error('Login error:', err);
       if (isMounted.current) {
-        setError(err.response?.data?.message || 'Login failed');
+        // Use a more generic message for a professional touch, but allow specific error if available
+        setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
       }
       setLoading(false);
     }
@@ -63,55 +64,81 @@ const Login = () => {
   // Show loading spinner while checking authentication status
   if (authLoading) {
     return (
-      <div className="container my-5">
-        <div className="d-flex justify-content-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container my-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card border-0 shadow-sm">
-            <div className="card-header bg-primary text-white">
-              <h4 className="mb-0">Login</h4>
+    // Centering the card vertically and horizontally in the viewport for a professional look
+    <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+      <div className="row w-100">
+        <div className="col-sm-10 col-md-8 col-lg-5 mx-auto"> 
+          {/* Increased shadow and slightly rounded corners for a modern card */}
+          <div className="card shadow-lg border-0 rounded-3"> 
+            
+            {/* Minimalist header - using an icon and clean padding */}
+            <div className="card-header bg-white text-center py-4 border-bottom-0"> 
+              <h2 className="fw-bold text-dark mb-0">
+                <i className="bi bi-box-arrow-in-right me-2 text-primary"></i>
+                Welcome Back
+              </h2>
+              <p className="text-muted mb-0 mt-1">Sign in to continue to your account.</p>
             </div>
-            <div className="card-body">
+            
+            <div className="card-body p-4 p-md-5">
+              
+              {/* Error Alert with a clean, dismissible style */}
               {error && (
-                <div className="alert alert-danger">
+                <div className="alert alert-danger alert-dismissible fade show" role="alert">
                   {error}
+                  <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setError('')}></button>
                 </div>
               )}
+
               <form onSubmit={handleSubmit}>
+                
+                {/* Email Field */}
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">Email</label>
+                  <label htmlFor="email" className="form-label visually-hidden">Email</label>
                   <input
                     type="email"
-                    className="form-control"
+                    // Added a placeholder and removed the visual label
+                    className="form-control form-control-lg" 
                     id="email"
+                    placeholder="Enter your email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">Password</label>
+
+                {/* Password Field */}
+                <div className="mb-4">
+                  <label htmlFor="password" className="form-label visually-hidden">Password</label>
                   <input
                     type="password"
-                    className="form-control"
+                    // Added a placeholder and removed the visual label
+                    className="form-control form-control-lg" 
                     id="password"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
-                <div className="d-grid">
-                  <button type="submit" className="btn btn-primary" disabled={loading}>
+
+                {/* Login Button */}
+                <div className="d-grid mb-4">
+                  <button 
+                    type="submit" 
+                    // Using a larger, bold button that stands out
+                    className="btn btn-primary btn-lg fw-bold" 
+                    disabled={loading}
+                  >
                     {loading ? (
                       <>
                         <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -121,9 +148,19 @@ const Login = () => {
                   </button>
                 </div>
               </form>
-              <div className="text-center mt-3">
-                <p>Don't have an account? <Link to="/register">Register</Link></p>
+              
+              {/* Footer Links - kept consistent but styled cleaner */}
+              <div className="text-center">
+                <p className="mb-0 text-muted">
+                  Don't have an account? 
+                  <Link to="/register" className="text-decoration-none fw-bold ms-1">
+                    Register Now
+                  </Link>
+                </p>
+                {/* Optional: Add a "Forgot Password" link for professionalism */}
+                {/* <p className="mt-2"><Link to="/forgot-password" className="text-decoration-none text-secondary">Forgot Password?</Link></p> */}
               </div>
+              
             </div>
           </div>
         </div>

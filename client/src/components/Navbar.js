@@ -19,7 +19,10 @@ const Navbar = () => {
   // Close the navbar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (navbarRef.current && !navbarRef.current.contains(event.target)) {
+      // Check if the click is outside the navbar (and not the toggler button, which is handled by Bootstrap/React state)
+      // Note: For Bootstrap dropdowns, the click is often handled by Bootstrap's JS, but this addresses the collapse menu for mobile.
+      const toggler = document.querySelector('.navbar-toggler');
+      if (navbarRef.current && !navbarRef.current.contains(event.target) && !toggler.contains(event.target)) {
         setIsMenuOpen(false);
       }
     };
@@ -38,7 +41,7 @@ const Navbar = () => {
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center" to="/">
           <div className="logo-container me-3">
-           <img 
+            <img 
                 src="https://t4.ftcdn.net/jpg/06/69/59/39/240_F_669593927_gN5dR3fy1IQP5yvAq0YTb8OdMZfq6A38.jpg" 
                 alt="Ezee Trip Logo" 
                 className="rounded-circle img-fluid"
@@ -56,7 +59,7 @@ const Navbar = () => {
           data-bs-toggle="collapse" 
           data-bs-target="#navbarNav" 
           aria-controls="navbarNav" 
-          aria-expanded="false" 
+          aria-expanded={isMenuOpen ? 'true' : 'false'} 
           aria-label="Toggle navigation"
           onClick={toggleMenu}
         >
@@ -71,7 +74,7 @@ const Navbar = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/packages" onClick={() => setIsMenuOpen(false)}>Packages</Link>
             </li>
-           
+            
           </ul>
           
           <ul className="navbar-nav">
@@ -80,7 +83,7 @@ const Navbar = () => {
                 {/* Combined Admin/User Dropdown */}
                 <li className="nav-item dropdown">
                   <Link 
-                    className="nav-link dropdown-toggle d-flex align-items-center" 
+                    className="nav-link dropdown-toggle user-dropdown-link d-flex align-items-center" 
                     to="#" 
                     id="userDropdown" 
                     role="button" 
@@ -92,7 +95,7 @@ const Navbar = () => {
                     </div>
                     <span>{user ? user.name : 'User'}</span>
                   </Link>
-                  <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="userDropdown">
+                  <ul className="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="userDropdown">
                     {/* Admin Links - Only visible to admin users */}
                     {isAuthenticated && user && user.role === 'admin' && (
                       <>
@@ -111,8 +114,8 @@ const Navbar = () => {
                             <i className="bi bi-calendar-check me-2"></i> Manage Bookings
                           </Link>
                         </li>
-                       
-                       
+                        
+                        
                         <li><hr className="dropdown-divider" /></li>
                       </>
                     )}
@@ -135,7 +138,7 @@ const Navbar = () => {
                     
                     <li><hr className="dropdown-divider" /></li>
                     <li>
-                      <button className="dropdown-item" onClick={() => { handleLogout(); setIsMenuOpen(false); }}>
+                      <button className="dropdown-item logout-button" onClick={() => { handleLogout(); setIsMenuOpen(false); }}>
                         <i className="bi bi-box-arrow-right me-2"></i> Logout
                       </button>
                     </li>
@@ -148,7 +151,7 @@ const Navbar = () => {
                   <Link className="nav-link" to="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/register" onClick={() => setIsMenuOpen(false)}>Register</Link>
+                  <Link className="nav-link register-btn" to="/register" onClick={() => setIsMenuOpen(false)}>Register</Link>
                 </li>
               </>
             )}
@@ -158,34 +161,33 @@ const Navbar = () => {
       
       {/* Custom CSS */}
       <style jsx>{`
+        /* --- General Navbar Styling --- */
         .navbar {
-          background-color: #0d6efd !important;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          /* Using a slightly darker/deeper primary blue for a richer feel */
+          background-color: #0c5cb2 !important; /* Slightly darker than default #0d6efd */
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Stronger shadow */
           padding: 0.75rem 0;
+          transition: background-color 0.3s ease;
         }
-        
+
         .navbar-brand {
           font-weight: 700;
           font-size: 1.5rem;
           padding: 0;
         }
-        
+
+        /* --- Logo Styling --- */
         .logo-container {
-          width: 40px;
-          height: 40px;
+          width: 45px; /* Slightly larger logo */
+          height: 45px;
           border-radius: 50%;
           overflow: hidden;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3); /* White border and stronger shadow */
           transition: transform 0.3s ease;
         }
-        
+
         .logo-container:hover {
-          transform: scale(1.05);
-        }
-        
-        .logo {
-          width: 100%;
-          height: 100%;
+          transform: scale(1.1); /* More pronounced hover effect */
         }
         
         .brand-text {
@@ -196,74 +198,150 @@ const Navbar = () => {
         
         .brand-name {
           color: white;
-          font-weight: 700;
-          font-size: 1.25rem;
+          font-weight: 800; /* Bolder font weight */
+          font-size: 1.35rem; /* Slightly larger brand name */
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
         }
         
         .brand-suffix {
-          color: rgba(255, 255, 255, 0.8);
-          font-weight: 400;
-          font-size: 0.9rem;
-        }
-        
-        .nav-link {
+          color: rgba(255, 255, 255, 0.9); /* Brighter suffix */
           font-weight: 500;
-          margin: 0 0.25rem;
-          border-radius: 4px;
+          font-size: 0.8rem; /* Slightly smaller suffix */
+          letter-spacing: 1px;
+        }
+
+        /* --- Nav Links Styling --- */
+        .nav-link {
+          font-weight: 600; /* Bolder font weight for links */
+          margin: 0 0.5rem; /* Increased margin */
+          padding: 0.5rem 0.75rem !important; /* Custom padding for better click area */
+          border-radius: 8px; /* Rounded corners for links */
           transition: all 0.3s ease;
+          color: rgba(255, 255, 255, 0.9);
         }
         
         .nav-link:hover {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgba(255, 255, 255, 0.2); /* More visible hover background */
+          color: white;
         }
-        
+
+        /* --- User Dropdown Styling (Authenticated) --- */
+        .user-dropdown-link {
+          background-color: rgba(255, 255, 255, 0.1);
+          border-radius: 20px; /* Pill-shaped button */
+          padding-right: 1.2rem !important;
+        }
+
+        .user-dropdown-link:hover {
+          background-color: rgba(255, 255, 255, 0.3);
+        }
+
         .user-avatar {
           width: 32px;
           height: 32px;
-          background-color: rgba(255, 255, 255, 0.2);
+          background-color: white; /* White background for icon */
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: white;
+          color: #0c5cb2; /* Icon color matching navbar background */
+          font-size: 1.2rem;
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
         
         .dropdown-menu {
-          border-radius: 8px;
+          border-radius: 10px; /* Softer rounded corners */
           margin-top: 0.5rem;
+          min-width: 200px;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Deeper shadow */
         }
         
         .dropdown-item {
           font-weight: 500;
-          padding: 0.5rem 1rem;
+          padding: 0.6rem 1rem; /* Increased padding */
           transition: all 0.2s ease;
+          color: #333; /* Darker text */
         }
         
         .dropdown-item:hover {
-          background-color: #f8f9fa;
-          padding-left: 1.25rem;
+          background-color: #e9ecef; /* Lighter hover background */
+          color: #0c5cb2; /* Primary color text on hover */
+          padding-left: 1.5rem; /* Larger indent on hover */
         }
         
         .dropdown-item i {
-          width: 16px;
+          width: 20px; /* Slightly wider icon area */
           text-align: center;
+          margin-right: 0.75rem !important;
+          color: #6c757d; /* Muted icon color */
+        }
+
+        .dropdown-item:hover i {
+          color: #0c5cb2; /* Icon primary color on hover */
+        }
+
+        .logout-button {
+            color: #dc3545; /* Danger color for logout button text */
+        }
+        
+        .logout-button:hover {
+            background-color: #f8d7da; /* Light red background on hover */
+            color: #dc3545; /* Keep text red */
         }
         
         .dropdown-divider {
           margin: 0.5rem 0;
+          border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* --- Unauthenticated Buttons --- */
+        .register-btn {
+          /* Highlight the register button */
+          background-color: #ffc107; /* Warning yellow */
+          color: #212529 !important; /* Dark text */
+          font-weight: 700;
+        }
+
+        .register-btn:hover {
+          background-color: #e0a800; /* Darker yellow on hover */
+          color: #212529 !important;
+          transform: translateY(-1px); /* Slight lift */
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
         
+        /* --- Mobile Responsiveness --- */
         @media (max-width: 991px) {
           .navbar-nav {
             padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1); /* Separator line in mobile menu */
           }
           
           .nav-link {
-            padding: 0.5rem 0;
+            padding: 0.75rem 0.5rem !important;
+            margin: 0.25rem 0;
           }
           
+          .user-dropdown-link {
+            padding-right: 0.75rem !important;
+            margin-bottom: 0.5rem;
+          }
+
           .user-avatar {
             margin-right: 0.5rem !important;
+          }
+
+          /* Ensure dropdown menu is full width on mobile */
+          .dropdown-menu {
+            position: static;
+            float: none;
+            width: 100%;
+            margin-top: 0;
+            border: none;
+            box-shadow: none;
+          }
+
+          .dropdown-item {
+            padding-left: 1rem;
           }
         }
       `}</style>

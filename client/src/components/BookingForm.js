@@ -121,7 +121,8 @@ const BookingForm = ({ pkg }) => {
           </div>
           
           <div className="mb-3">
-            <label className="form-label">Child Price</label>
+            <label className="form-label">Child Price</label><br/>
+            <label className="form-label">Under 5 years</label>
             <input 
               type="text" 
               className="form-control" 
